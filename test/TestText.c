@@ -44,11 +44,30 @@ void test_charCount_newlines(void)
     TEST_ASSERT_EQUAL_UINT64(2, numberOfNewlines);
 }
 
+void test_removeDuplicateConsecutiveChars(void)
+{
+    FILE *in = tmpfile();
+    FILE *out = tmpfile();
+
+    fputs("     asfas  \n\t  \t  \n  \t", in);
+    rewind(in);
+
+    char remove = ' ';
+    removeDuplicateConsecutiveChars(remove, in, out);
+    rewind(out);
+
+    char buffer[256];
+    fread(buffer, 1, sizeof(buffer), out);
+
+    TEST_ASSERT_EQUAL_STRING(" asfas \n\t \t \n \t", buffer);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
     RUN_TEST(test_charCount_blanks);
     RUN_TEST(test_charCount_tabs);
     RUN_TEST(test_charCount_newlines);
+    RUN_TEST(test_removeDuplicateConsecutiveChars);
     return UNITY_END();
 }

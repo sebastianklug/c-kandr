@@ -5,5 +5,6 @@
 #include <stdint.h>
 
 uint64_t charCount(char charToCount, FILE *in);
+void removeDuplicateConsecutiveChars(char remove, FILE *in, FILE *out);
 
 #endif

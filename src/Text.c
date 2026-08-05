@@ -1,6 +1,30 @@
 #include "Text.h"
 
-int charCount(char charToCount, FILE *in, FILE *out)
+uint64_t charCount(char charToCount, FILE *in)
 {
-    return 0;
+    char c;
+    long count = 0;
+    while((c = fgetc(in)) != EOF)
+    {
+        if(c == charToCount)
+        {
+            ++count;
+        }
+    }
+    return count;
+}
+
+void removeDuplicateConsecutiveChars(char remove, FILE *in, FILE *out)
+{
+    char prev;
+    char c;
+
+    while((c = fgetc(in)) != EOF)
+    {
+        if(!((prev == remove) && (c == remove)))
+        {
+            fputc(c, out);
+        }
+        prev = c;
+    }
 }

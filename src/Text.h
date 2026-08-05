@@ -2,7 +2,8 @@
 #define TEXT_H
 
 #include <stdio.h>
+#include <stdint.h>
 
-int charCount(char charToCount, FILE *in, FILE *out);
+uint64_t charCount(char charToCount, FILE *in);
 
 #endif

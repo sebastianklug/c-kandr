@@ -4,61 +4,44 @@
 void setUp() {} // Nothing
 void tearDown() {} // Nothing
 
+
 void test_charCount_blanks(void)
 {
     FILE *in = tmpfile();
-    FILE *out = tmpfile();
 
     fputs("     asfas  \n\t  \t  \n  \t", in);
     rewind(in);
 
     char charToCount = ' ';
-    int numberOfBlanks = charCount(charToCount, in, out);
+    uint64_t numberOfBlanks = charCount(charToCount, in);
 
-    rewind(out);
-
-    char buffer[32];
-    fgets(buffer, sizeof(buffer), out);
-
-    TEST_ASSERT_EQUAL_INT(10, numberOfBlanks);
+    TEST_ASSERT_EQUAL_UINT64(13, numberOfBlanks);
 }
 
 void test_charCount_tabs(void)
 {
     FILE *in = tmpfile();
-    FILE *out = tmpfile();
 
     fputs("     asfas  \n\t  \t  \n  \t", in);
     rewind(in);
 
     char charToCount = '\t';
-    int numberOfTabs = charCount(charToCount, in, out);
+    uint64_t numberOfTabs = charCount(charToCount, in);
 
-    rewind(out);
-
-    char buffer[32];
-    fgets(buffer, sizeof(buffer), out);
-
-     TEST_ASSERT_EQUAL_INT(3, numberOfTabs);
+    TEST_ASSERT_EQUAL_UINT64(3, numberOfTabs);
 }
 
 void test_charCount_newlines(void)
 {
     FILE *in = tmpfile();
-    FILE *out = tmpfile();
 
     fputs("     asfas  \n\t  \t  \n  \t", in);
     rewind(in);
 
     char charToCount = '\n';
-    int numberOfNewlines = charCount(charToCount, in, out);
+    uint64_t numberOfNewlines = charCount(charToCount, in);
 
-    rewind(out);
-
-    char buffer[32];
-    fgets(buffer, sizeof(buffer), out);
-
-    TEST_ASSERT_EQUAL_INT(2, numberOfNewlines);
+    TEST_ASSERT_EQUAL_UINT64(2, numberOfNewlines);
 }
 
 int main(void)

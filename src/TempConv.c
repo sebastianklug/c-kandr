@@ -29,7 +29,6 @@ int temperatureConvert(char *buf, size_t size, int lower, int upper, int step)
     for (; (step > 0) ? (fahr <= end) : (fahr >= end); fahr += step)
     {
         len += snprintf(buf + len, size - len, "%3d %6.1f\n", fahr, fahrenheitToCelcius(fahr));
-        printf(buf);
     }
     
     return 0;

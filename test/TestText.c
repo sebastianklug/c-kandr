@@ -1,5 +1,3 @@
-#include <string.h>
-
 #include "../unity/src/unity.h"
 #include "../src/Text.h"
 
@@ -104,6 +102,51 @@ void test_tabsToSpaces(void)
     TEST_ASSERT_EQUAL_STRING("     asfas  \n            \n      ", buffer);
 }
 
+void test_SpacesToTabs(void)
+{
+    FILE *in = tmpfile();
+    FILE *out = tmpfile();
+    size_t noOfSpacesInTab = 4;
+
+    fputs("     asfas    \n\t   \t  \n \t", in);
+    rewind(in);
+
+    spacesToTabs(noOfSpacesInTab, in, out);
+
+    rewind(out);
+    char buffer[256];
+    size_t n = fread(buffer, 1, sizeof(buffer), out);
+    buffer[n] = '\0';
+
+    TEST_ASSERT_EQUAL_STRING("\t asfas\t\n\t   \t  \n \t", buffer);
+}
+
+void test_fold(void)
+{
+    FILE *in = tmpfile();
+    FILE *out = tmpfile();
+    size_t noOfColumns = 80;
+
+    fputs(
+        "Lorem ipsum dolor sit amet, consectetur adip\niscing elit. \tFusce et tincidunt massa, id \nmaximus odio."
+        " Pellentesque mattis libero vel \tenim rutrum, a sodales mi eleifend. asdkfjaskldfjaskdlfjaskldfjasdklfjaskldfjasdkfjaskldfjaskdlfjaskldfjasdklfjaskldfj",
+        in
+    );
+    rewind(in);
+
+    fold(noOfColumns, in, out);
+
+    rewind(out);
+    char buffer[256];
+    size_t n = fread(buffer, 1, sizeof(buffer), out);
+    buffer[n] = '\0';
+
+    TEST_ASSERT_EQUAL_STRING(
+        "Lorem ipsum dolor sit amet, consectetur adip\niscing elit. \tFusce et tincidunt massa, id \nmaximus odio."
+        " Pellentesque mattis libero vel \tenim rutrum, a sodales mi \neleifend. asdkfjaskldfjaskdlfjaskldfjasdklfjaskldfjasdkfjaskldfjaskdlfjaskldfja-\nsdklfjaskldfj",
+    buffer);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -113,5 +156,7 @@ int main(void)
     RUN_TEST(test_removeDuplicateConsecutiveChars);
     RUN_TEST(test_wordLengthStats);
     RUN_TEST(test_tabsToSpaces);
+    RUN_TEST(test_SpacesToTabs);
+    RUN_TEST(test_fold);
     return UNITY_END();
 }

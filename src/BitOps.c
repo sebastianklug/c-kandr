@@ -46,6 +46,18 @@ void squeeze(char s1[], char s2[])
     s1[j] = '\0';
 }
 
+int16_t any(char s1[], char s2[])
+{
+    for (int i=0; s1[i] != '\0'; i++)
+    {
+        if (strchr(s2, s1[i]) != NULL)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
 static int16_t hex_value_of_char(char c) {
     if (c >= '0' && c <= '9') return c - '0';
     if (c >= 'a' && c <= 'f') return c - 'a' + 10;

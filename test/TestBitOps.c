@@ -76,12 +76,43 @@ void test_any(void)
     TEST_ASSERT_EQUAL_INT16(2, index);
 }
 
+void test_setbits(void)
+{
+    uint16_t x = 0b0000000011000000111001;
+    uint16_t y = 0b0000000011000000111101;
+    int16_t p = 2;
+    int16_t n = 3;
+
+    uint16_t res = setbits(x, p, n, y);
+
+    TEST_ASSERT_EQUAL_UINT16(0b0000000011000000111101, res);
+
+    x = 0b0000000011000000111001;
+    y = 0b0000000011000000111101;
+    p = 20;
+    n = 6;
+
+    res = setbits(x, p, n, y);
+
+    TEST_ASSERT_EQUAL_UINT16(0b1011000000111001, res);
+
+    x = 0b0000000011000000111001;
+    y = 0b0000000011000000111101;
+    p = 2;
+    n = 6;
+
+    res = setbits(x, p, n, y);
+
+    TEST_ASSERT_EQUAL_UINT16(0b0000000011000000111111, res);
+}
+
 int main(void) 
 {
     UNITY_BEGIN();
     RUN_TEST(test_htoi);
     RUN_TEST(test_squeeze);
     RUN_TEST(test_any);
+    RUN_TEST(test_setbits);
     
     return UNITY_END();
 }

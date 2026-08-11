@@ -91,6 +91,22 @@ uint16_t invert(uint16_t x, int16_t p, int16_t n)
     return x ^ mask;
 }
 
+uint16_t rightrot(uint16_t x, int16_t n)
+{
+    if ((n % BIT_WIDTH_UINT16) == 0)
+    {
+        // Special handling of no rotation
+        return x;
+    }
+    n = n % BIT_WIDTH_UINT16;
+    uint16_t rightBits = x << (BIT_WIDTH_UINT16 - n);
+    
+    x = x >> n;
+    return x | rightBits;
+}
+
+/************************************************/
+
 static int16_t hex_value_of_char(char c) 
 {
     if (c >= '0' && c <= '9') return c - '0';

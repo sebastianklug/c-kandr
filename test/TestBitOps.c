@@ -106,6 +106,32 @@ void test_setbits(void)
     TEST_ASSERT_EQUAL_UINT16(0b0000000011000000111111, res);
 }
 
+void test_invert(void)
+{
+    uint16_t x = 0b0011000000111001;
+    
+    int16_t p = 14;
+    int16_t n = 6;
+
+    uint16_t res = invert(x, p, n);
+
+    TEST_ASSERT_EQUAL_UINT16(0b0100111000111001, res);
+
+    p = 20;
+    n = 6;
+
+    res = invert(x, p, n);
+
+    TEST_ASSERT_EQUAL_UINT16(0b1011000000111001, res);
+
+    p = 2;
+    n = 6;
+
+    res = invert(x, p, n);
+
+    TEST_ASSERT_EQUAL_UINT16(0b0011000000111110, res);
+}
+
 int main(void) 
 {
     UNITY_BEGIN();
@@ -113,6 +139,7 @@ int main(void)
     RUN_TEST(test_squeeze);
     RUN_TEST(test_any);
     RUN_TEST(test_setbits);
+    RUN_TEST(test_invert);
     
     return UNITY_END();
 }

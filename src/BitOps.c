@@ -74,7 +74,25 @@ uint16_t setbits(uint16_t x, int16_t p, int16_t n, uint16_t y)
     return x | mask;
 }
 
-static int16_t hex_value_of_char(char c) {
+uint16_t invert(uint16_t x, int16_t p, int16_t n)
+{
+    int16_t insertPos = p-n+1;
+    uint16_t mask = ~(~0 << n);
+    if (insertPos > 0)
+    {
+        mask = mask << insertPos;
+    }
+    else
+    {
+        mask = mask >> -(insertPos);
+    }
+    printf("mask: %b\n", mask);
+    
+    return x ^ mask;
+}
+
+static int16_t hex_value_of_char(char c) 
+{
     if (c >= '0' && c <= '9') return c - '0';
     if (c >= 'a' && c <= 'f') return c - 'a' + 10;
     if (c >= 'A' && c <= 'F') return c - 'A' + 10;

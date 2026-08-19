@@ -209,6 +209,33 @@ void test_expand_empty_and_single_char(void)
     TEST_ASSERT_EQUAL_STRING("x", out);
 }
 
+void test_strrindex_basic_match(void)
+{
+    TEST_ASSERT_EQUAL_INT(0,  strrindex("abc", "a"));    // first char
+    TEST_ASSERT_EQUAL_INT(2,  strrindex("abc", "c"));    // last char
+    TEST_ASSERT_EQUAL_INT(4,  strrindex("abcabc", "b")); // multiple matches, rightmost
+}
+
+void test_strrindex_substring(void)
+{
+    TEST_ASSERT_EQUAL_INT(3,  strrindex("abcbc", "bc"));   // matches at 1 and 3. rightmost is 3.
+    TEST_ASSERT_EQUAL_INT(2,  strrindex("abcbc", "cbc"));  // rightmost "cbc" starts at 2
+    TEST_ASSERT_EQUAL_INT(3,  strrindex("aaaaa", "aa"));   // overlapping occurrences, rightmost starting index
+}
+
+void test_strrindex_no_match(void)
+{
+    TEST_ASSERT_EQUAL_INT(-1, strrindex("abc", "d"));     // pattern not in text
+    TEST_ASSERT_EQUAL_INT(-1, strrindex("abc", "abcd"));  // pattern longer than text
+    TEST_ASSERT_EQUAL_INT(-1, strrindex("", "a"));        // empty text
+}
+
+void test_strrindex_empty_pattern(void)
+{
+    TEST_ASSERT_EQUAL_INT(-1, strrindex("abc", ""));   // if you define it as end-of-string
+    TEST_ASSERT_EQUAL_INT(-1, strrindex("", ""));      // empty in empty
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -229,6 +256,10 @@ int main(void)
     RUN_TEST(test_expand_invalid_or_descending_range_copied_literal);
     RUN_TEST(test_expand_mixed_cases);
     RUN_TEST(test_expand_empty_and_single_char);
-    
+    RUN_TEST(test_strrindex_basic_match);
+    RUN_TEST(test_strrindex_substring);
+    RUN_TEST(test_strrindex_no_match);
+    RUN_TEST(test_strrindex_empty_pattern);
+   
     return UNITY_END();
 }

@@ -61,3 +61,22 @@ void expand(const char s1[], char s2[])
         prev = s1[i];
     }
 }
+
+int16_t strrindex(char s[], char t[])
+{
+    int i, j, k;
+    int16_t res = -1;
+
+    for (i=0; s[i] != '\0'; i++)
+    {
+        for (j=i, k=0; t[k]!='\0' && s[j]==t[k]; j++, k++)
+        {
+            ;
+        }
+        if (k > 0 && t[k] == '\0')
+        {
+            res = i;
+        }
+    }
+    return res;
+}

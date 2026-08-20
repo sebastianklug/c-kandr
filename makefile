@@ -51,7 +51,29 @@ test: $(BUILD_PATHS) $(RESULTS)
 $(PATHR)%.txt: $(PATHB)%.$(TARGET_EXTENSION)
 	-./$< > $@ 2>&1
 
-$(PATHB)Test%.$(TARGET_EXTENSION): $(PATHO)Test%.o $(PATHO)%.o $(PATHO)unity.o #$(PATHD)Test%.d
+#$(PATHB)Test%.$(TARGET_EXTENSION): $(PATHO)Test%.o $(PATHO)%.o $(PATHO)unity.o #$(PATHD)Test%.d
+#	$(LINK) -o $@ $^
+
+# TestInput.out links TestInput.o + Input.o + unity.o
+$(PATHB)TestInput.$(TARGET_EXTENSION): $(PATHO)TestInput.o $(PATHO)Input.o $(PATHO)unity.o
+	$(LINK) -o $@ $^
+
+# TestPointers.out links TestPointers.o + Pointers.o + Input.o + unity.o
+# (Pointers.c uses getch/ungetch from Input.c)
+$(PATHB)TestPointers.$(TARGET_EXTENSION): $(PATHO)TestPointers.o $(PATHO)Pointers.o $(PATHO)Input.o $(PATHO)unity.o
+	$(LINK) -o $@ $^
+
+# Example: TestBitOps.out links TestBitOps.o + BitOps.o + unity.o
+$(PATHB)TestBitOps.$(TARGET_EXTENSION): $(PATHO)TestBitOps.o $(PATHO)BitOps.o $(PATHO)unity.o
+	$(LINK) -o $@ $^
+
+$(PATHB)TestString.$(TARGET_EXTENSION): $(PATHO)TestString.o $(PATHO)String.o $(PATHO)unity.o
+	$(LINK) -o $@ $^
+
+$(PATHB)TestTempConv.$(TARGET_EXTENSION): $(PATHO)TestTempConv.o $(PATHO)TempConv.o $(PATHO)unity.o
+	$(LINK) -o $@ $^
+
+$(PATHB)TestText.$(TARGET_EXTENSION): $(PATHO)TestText.o $(PATHO)Text.o $(PATHO)unity.o
 	$(LINK) -o $@ $^
 
 $(PATHO)%.o:: $(PATHT)%.c

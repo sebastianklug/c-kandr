@@ -236,9 +236,58 @@ void test_strrindex_empty_pattern(void)
     TEST_ASSERT_EQUAL_INT(-1, strrindex("", ""));      // empty in empty
 }
 
+void test_itoa_zero(void)
+{
+    char buf[8] = {0};
+    itoa(0, buf);
+    TEST_ASSERT_EQUAL_STRING("0", buf);
+}
+
+void test_itoa_positive_numbers(void)
+{
+    char buf[16] = {0};
+
+    itoa(1, buf);
+    TEST_ASSERT_EQUAL_STRING("1", buf);
+
+    itoa(12, buf);
+    TEST_ASSERT_EQUAL_STRING("12", buf);
+
+    itoa(1234, buf);
+    TEST_ASSERT_EQUAL_STRING("1234", buf);
+}
+
+void test_itoa_negative_numbers(void)
+{
+    char buf[16] = {0};
+
+    itoa(-1, buf);
+    TEST_ASSERT_EQUAL_STRING("-1", buf);
+
+    itoa(-12, buf);
+    TEST_ASSERT_EQUAL_STRING("-12", buf);
+
+    itoa(-1234, buf);
+    TEST_ASSERT_EQUAL_STRING("-1234", buf);
+}
+
+void test_itoa_int16_limits(void)
+{
+    char buf[16] = {0};
+
+    // int16_t max: 32767
+    itoa(32767, buf);
+    TEST_ASSERT_EQUAL_STRING("32767", buf);
+
+    // int16_t min: -32768
+    itoa(-32768, buf);
+    TEST_ASSERT_EQUAL_STRING("-32768", buf);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
+
     RUN_TEST(test_escape_no_special_chars);
     RUN_TEST(test_escape_newline_only);
     RUN_TEST(test_escape_tab_only);
@@ -260,6 +309,10 @@ int main(void)
     RUN_TEST(test_strrindex_substring);
     RUN_TEST(test_strrindex_no_match);
     RUN_TEST(test_strrindex_empty_pattern);
+    RUN_TEST(test_itoa_zero);
+    RUN_TEST(test_itoa_positive_numbers);
+    RUN_TEST(test_itoa_negative_numbers);
+    RUN_TEST(test_itoa_int16_limits);
    
     return UNITY_END();
 }

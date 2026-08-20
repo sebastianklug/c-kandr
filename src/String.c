@@ -80,3 +80,25 @@ int16_t strrindex(char s[], char t[])
     }
     return res;
 }
+
+static void itoa_helper(uint16_t n, char *s_p, size_t *index_p)
+{
+    if ((n / 10) > 0)
+    {
+        itoa_helper(n / 10, s_p, index_p);
+    }
+    s_p[(*index_p)++] = (char)(n % 10 + '0');
+}
+
+void itoa(int16_t n, char *s_p)
+{
+    uint16_t nu = n;
+    size_t index = 0;
+    if (n < 0)
+    {
+        s_p[index++] = '-';
+        nu = n * -1;
+    }
+    itoa_helper(nu, s_p, &index);
+    s_p[index] = '\0';   
+}

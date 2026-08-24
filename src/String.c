@@ -19,7 +19,6 @@ void escape(char s[], const char t[])
             s[i++] = t[j];
             break;
         }
-        //printf("j: %d, i: %d, t[j]: %c, s: %s\n", j, i, t[j], s);
     }
     s[i] = '\0';
 }
@@ -57,7 +56,6 @@ void expand(const char s1[], char s2[])
             s2[j++] = s1[i];
         }
         s2[j] = '\0';
-        printf("s1: %s, s2: %s\n", s1, s2);
         prev = s1[i];
     }
 }
@@ -101,4 +99,34 @@ void itoa(int16_t n, char *s_p)
     }
     itoa_helper(nu, s_p, &index);
     s_p[index] = '\0';   
+}
+
+void krstrcat(char *s, char *t)
+{
+    int i, j;
+    char *temp = s;
+    i = j = 0;
+
+    while (s[i] != '\0') /* find end of s */
+    {
+        i++;
+    }
+    while ((s[i++] = t[j++]) != '\0') /* copy t */
+    {
+        ;
+    }
+    printf("%s\n", temp);
+}
+
+void krstrcat_p(char *s, char *t)
+{
+    char *temp = s;
+    while(*s) 
+    {
+        s++;
+    }
+    while(*s++ = *t++)
+    {
+       ;
+    }
 }

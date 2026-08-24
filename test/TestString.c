@@ -284,6 +284,104 @@ void test_itoa_int16_limits(void)
     TEST_ASSERT_EQUAL_STRING("-32768", buf);
 }
 
+/* Helper: run the same concat test on both implementations */
+static void assert_krstrcat_both(const char *initial_s, const char *t, const char *expected)
+{
+    char buf1[128];
+    char buf2[128];
+
+    /* Prepare separate buffers for each implementation */
+    strcpy(buf1, initial_s);
+    strcpy(buf2, initial_s);
+
+    /* Call array/index version */
+    krstrcat(buf1, (char *)t);
+    TEST_ASSERT_EQUAL_STRING(expected, buf1);
+
+    /* Call pointer version */
+    krstrcat_p(buf2, (char *)t);
+    TEST_ASSERT_EQUAL_STRING(expected, buf2);
+}
+
+/* 1. Simple concat: "Hello" + "World" */
+void test_krstrcat_simple(void)
+{
+    assert_krstrcat_both("Hello", "World", "HelloWorld");
+}
+
+/* 2. Empty t: "Hello" + "" -> "Hello" */
+void test_krstrcat_empty_t(void)
+{
+    assert_krstrcat_both("Hello", "", "Hello");
+}
+
+/* 3. Empty s: "" + "World" -> "World" */
+void test_krstrcat_empty_s(void)
+{
+    assert_krstrcat_both("", "World", "World");
+}
+
+/* 4. Both empty: "" + "" -> "" */
+void test_krstrcat_both_empty(void)
+{
+    assert_krstrcat_both("", "", "");
+}
+
+/* 5. Multiple concatenations */
+void test_krstrcat_multiple_appends(void)
+{
+    char buf1[128];
+    char buf2[128];
+
+    strcpy(buf1, "A");
+    strcpy(buf2, "A");
+
+    /* array/index version */
+    krstrcat(buf1, "B");        // "AB"
+    krstrcat(buf1, "C");        // "ABC"
+    TEST_ASSERT_EQUAL_STRING("ABC", buf1);
+
+    /* pointer version */
+    krstrcat_p(buf2, "B");      // "AB"
+    krstrcat_p(buf2, "C");      // "ABC"
+    TEST_ASSERT_EQUAL_STRING("ABC", buf2);
+}
+
+/* 6. Ensure null-termination is preserved */
+void test_krstrcat_null_termination(void)
+{
+    char buf1[8];
+    char buf2[8];
+
+    /* Enough room for "A" + "B" + '\0' */
+    strcpy(buf1, "A");
+    strcpy(buf2, "A");
+
+    krstrcat(buf1, "B");
+    krstrcat_p(buf2, "B");
+
+    TEST_ASSERT_EQUAL_STRING("AB", buf1);
+    TEST_ASSERT_EQUAL_STRING("AB", buf2);
+
+    /* Verify explicit null terminator */
+    TEST_ASSERT_EQUAL_CHAR('\0', buf1[2]);
+    TEST_ASSERT_EQUAL_CHAR('\0', buf2[2]);
+}
+
+/* 7. Non-ASCII characters (just bytes) */
+void test_krstrcat_non_ascii(void)
+{
+    /* Use bytes with high bit set; treated as chars */
+    const char s_init[] = "A\xC3";
+    const char t[]      = "\xB1B";  // arbitrary bytes
+
+    char expected[16];
+    strcpy(expected, s_init);
+    krstrcat(expected, (char *)t);    // use library krstrcat to build expected
+
+    assert_krstrcat_both(s_init, t, expected);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -313,6 +411,13 @@ int main(void)
     RUN_TEST(test_itoa_positive_numbers);
     RUN_TEST(test_itoa_negative_numbers);
     RUN_TEST(test_itoa_int16_limits);
-   
+    RUN_TEST(test_krstrcat_simple);
+    RUN_TEST(test_krstrcat_empty_t);
+    RUN_TEST(test_krstrcat_empty_s);
+    RUN_TEST(test_krstrcat_both_empty);
+    RUN_TEST(test_krstrcat_multiple_appends);
+    RUN_TEST(test_krstrcat_null_termination);
+    RUN_TEST(test_krstrcat_non_ascii);
+
     return UNITY_END();
 }

@@ -373,13 +373,209 @@ void test_krstrcat_non_ascii(void)
 {
     /* Use bytes with high bit set; treated as chars */
     const char s_init[] = "A\xC3";
-    const char t[]      = "\xB1B";  // arbitrary bytes
+    const char t[]      = "\xB1""B";  // arbitrary bytes
 
     char expected[16];
     strcpy(expected, s_init);
     krstrcat(expected, (char *)t);    // use library krstrcat to build expected
 
     assert_krstrcat_both(s_init, t, expected);
+}
+
+/* 1. Exact match: s and t identical */
+void test_strend_exact_match(void)
+{
+    TEST_ASSERT_TRUE(strend("hello", "hello"));
+}
+
+/* 2. t is proper suffix of s */
+void test_strend_t_is_suffix(void)
+{
+    TEST_ASSERT_TRUE(strend("hello", "lo"));
+    TEST_ASSERT_TRUE(strend("abcdef", "def"));
+    TEST_ASSERT_TRUE(strend("xyz", "z"));
+}
+
+/* 3. t is not at the end */
+void test_strend_t_not_suffix(void)
+{
+    TEST_ASSERT_FALSE(strend("hello", "he"));
+    TEST_ASSERT_FALSE(strend("abcdef", "abc"));
+    TEST_ASSERT_FALSE(strend("abcdef", "cd"));
+}
+
+/* 4. t longer than s: cannot be suffix */
+void test_strend_t_longer_than_s(void)
+{
+    TEST_ASSERT_FALSE(strend("hi", "hello"));
+    TEST_ASSERT_FALSE(strend("", "a"));
+}
+
+/* 5. Empty t: usually considered suffix of any s (including empty) */
+void test_strend_empty_t(void)
+{
+    TEST_ASSERT_TRUE(strend("hello", ""));
+    TEST_ASSERT_TRUE(strend("", ""));
+}
+
+/* 6. Empty s, non-empty t: cannot be suffix */
+void test_strend_empty_s_nonempty_t(void)
+{
+    TEST_ASSERT_FALSE(strend("", "hello"));
+}
+
+/* 7. Multiple similar endings */
+void test_strend_similar_endings(void)
+{
+    TEST_ASSERT_TRUE(strend("banana", "ana"));    // suffix "ana"
+    TEST_ASSERT_FALSE(strend("banana", "ban"));   // "ban" is a prefix, not a suffix
+}
+
+/* 8. Non-ASCII / arbitrary bytes (treated as chars) */
+void test_strend_non_ascii(void)
+{
+    const char *s = "A\xC3\xB1";   // "A" + two non-ASCII bytes
+    const char *t = "\xC3\xB1";    // last two bytes
+    TEST_ASSERT_TRUE(strend((char *)s, (char *)t));
+
+    TEST_ASSERT_FALSE(strend((char *)s, "A"));
+}
+
+
+/* 1. krstrncpy copy less than length of t, s remains without explicit '\0' beyond n */
+void test_krstrncpy_copy_partial(void)
+{
+    char s[10];
+    const char *t = "abcdef";
+
+    // Clear s to see what happens beyond n
+    memset(s, 'X', sizeof(s));
+
+    krstrncpy(s, t, 3);  // copy "abc"
+
+    TEST_ASSERT_EQUAL_CHAR('a', s[0]);
+    TEST_ASSERT_EQUAL_CHAR('b', s[1]);
+    TEST_ASSERT_EQUAL_CHAR('c', s[2]);
+
+    // Standard krstrncpy does NOT guarantee '\0' at s[3] when n < strlen(t)
+}
+
+/* 2. krstrncpy copy exactly n when n >= strlen(t): remaining bytes padded with '\0' */
+void test_krstrncpy_copy_with_padding(void)
+{
+    char s[10];
+    const char *t = "abc";
+
+    memset(s, 'X', sizeof(s));
+
+    krstrncpy(s, t, 6);  // n > strlen(t), copy "abc" then pad with '\0'
+
+    TEST_ASSERT_EQUAL_CHAR('a', s[0]);
+    TEST_ASSERT_EQUAL_CHAR('b', s[1]);
+    TEST_ASSERT_EQUAL_CHAR('c', s[2]);
+
+    TEST_ASSERT_EQUAL_CHAR('\0', s[3]);
+    TEST_ASSERT_EQUAL_CHAR('\0', s[4]);
+    TEST_ASSERT_EQUAL_CHAR('\0', s[5]);
+}
+
+/* 3. krstrncpy with n == 0: no copy */
+void test_krstrncpy_zero_n(void)
+{
+    char s[10] = "XXXXXXXXX";
+    const char *t = "abc";
+
+    krstrncpy(s, t, 0);  // no bytes copied
+
+    TEST_ASSERT_EQUAL_STRING("XXXXXXXXX", s);
+}
+
+
+/* 4. krstrncat appends partial t */
+void test_krstrncat_append_partial(void)
+{
+    char s[16] = "Hello";
+    const char *t = "World";
+
+    krstrncat(s, t, 3);  // append "Wor"
+
+    TEST_ASSERT_EQUAL_STRING("HelloWor", s);
+}
+
+/* 5. krstrncat appends full t when n >= strlen(t) */
+void test_krstrncat_append_full(void)
+{
+    char s[16] = "Hello";
+    const char *t = "World";
+
+    krstrncat(s, t, 10);  // n bigger than strlen(t) = 5
+
+    TEST_ASSERT_EQUAL_STRING("HelloWorld", s);
+}
+
+/* 6. krstrncat with n == 0: s unchanged */
+void test_krstrncat_zero_n(void)
+{
+    char s[16] = "Hello";
+    const char *t = "World";
+
+    krstrncat(s, t, 0);  // append nothing
+
+    TEST_ASSERT_EQUAL_STRING("Hello", s);
+}
+
+
+/* 7. krstrncmp equal strings, n >= length */
+void test_krstrncmp_equal_full(void)
+{
+    const char *s = "abc";
+    const char *t = "abc";
+
+    int r = krstrncmp(s, t, 5);
+    TEST_ASSERT_EQUAL_INT(0, r);
+}
+
+/* 8. krstrncmp equal up to n, but different afterwards; n small */
+void test_krstrncmp_equal_prefix(void)
+{
+    const char *s = "abcdef";
+    const char *t = "abcXYZ";
+
+    int r = krstrncmp(s, t, 3);  // compare only "abc"
+    TEST_ASSERT_EQUAL_INT(0, r);
+
+    r = krstrncmp(s, t, 4);      // compare "abcd" vs "abcX"
+    TEST_ASSERT_TRUE(r > 0);   // 'd' > 'X' in ASCII
+}
+
+/* 9. krstrncmp s < t */
+void test_krstrncmp_less(void)
+{
+    const char *s = "abc";
+    const char *t = "abd";
+
+    int r = krstrncmp(s, t, 3);
+    TEST_ASSERT_TRUE(r < 0);   // 'c' < 'd'
+}
+
+/* 10. krstrncmp s > t */
+void test_krstrncmp_greater(void)
+{
+    const char *s = "abd";
+    const char *t = "abc";
+
+    int r = krstrncmp(s, t, 3);
+    TEST_ASSERT_TRUE(r > 0);   // 'd' > 'c'
+}
+
+/* 11. krstrncmp with n == 0: always equal */
+void test_krstrncmp_zero_n(void)
+{
+    const char *s = "abc";
+    const char *t = "xyz";
+
+    int r = krstrncmp(s, t, 0);
+    TEST_ASSERT_EQUAL_INT(0, r);
 }
 
 int main(void)
@@ -418,6 +614,31 @@ int main(void)
     RUN_TEST(test_krstrcat_multiple_appends);
     RUN_TEST(test_krstrcat_null_termination);
     RUN_TEST(test_krstrcat_non_ascii);
+    RUN_TEST(test_strend_exact_match);
+    RUN_TEST(test_strend_t_is_suffix);
+    RUN_TEST(test_strend_t_not_suffix);
+    RUN_TEST(test_strend_t_longer_than_s);
+    RUN_TEST(test_strend_empty_t);
+    RUN_TEST(test_strend_empty_s_nonempty_t);
+    RUN_TEST(test_strend_similar_endings);
+    RUN_TEST(test_strend_non_ascii);
+    
+    /* krstrncpy tests */
+    RUN_TEST(test_krstrncpy_copy_partial);
+    RUN_TEST(test_krstrncpy_copy_with_padding);
+    RUN_TEST(test_krstrncpy_zero_n);
+
+    /* krstrncat tests */
+    RUN_TEST(test_krstrncat_append_partial);
+    RUN_TEST(test_krstrncat_append_full);
+    RUN_TEST(test_krstrncat_zero_n);
+
+    /* krstrncmp tests */
+    RUN_TEST(test_krstrncmp_equal_full);
+    RUN_TEST(test_krstrncmp_equal_prefix);
+    RUN_TEST(test_krstrncmp_less);
+    RUN_TEST(test_krstrncmp_greater);
+    RUN_TEST(test_krstrncmp_zero_n);
 
     return UNITY_END();
 }

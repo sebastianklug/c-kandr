@@ -1,5 +1,24 @@
 #include "String.h"
 
+static void itoa_helper(uint16_t n, char *s_p, size_t *index_p)
+{
+    if ((n / 10) > 0)
+    {
+        itoa_helper(n / 10, s_p, index_p);
+    }
+    s_p[(*index_p)++] = (char)(n % 10 + '0');
+}
+
+static char *last_char_in_string(char *s)
+{
+    while(*s)
+    {
+        s++;
+    }
+    return s-1;
+}
+/************************************************************* */
+
 void escape(char s[], const char t[])
 {
     int i=0;
@@ -79,15 +98,6 @@ int16_t strrindex(char s[], char t[])
     return res;
 }
 
-static void itoa_helper(uint16_t n, char *s_p, size_t *index_p)
-{
-    if ((n / 10) > 0)
-    {
-        itoa_helper(n / 10, s_p, index_p);
-    }
-    s_p[(*index_p)++] = (char)(n % 10 + '0');
-}
-
 void itoa(int16_t n, char *s_p)
 {
     uint16_t nu = n;
@@ -120,13 +130,73 @@ void krstrcat(char *s, char *t)
 
 void krstrcat_p(char *s, char *t)
 {
-    char *temp = s;
-    while(*s) 
-    {
-        s++;
-    }
+    s = last_char_in_string(s) + 1;
     while(*s++ = *t++)
     {
        ;
     }
+}
+
+bool strend(char *s, char *t)
+{
+    size_t lent = strlen(t);
+    
+    if (lent > strlen(s))
+    {
+        return false;
+    }
+
+    printf("s: %s, t: %s\n", s, t);
+    
+    s = last_char_in_string(s);
+    t = last_char_in_string(t);
+
+    for (int i=0; (i < lent); *s--, *t--, i++)
+    {
+        printf("s: %c, t: %c\n", *s, *t);
+
+        if (*s!=*t)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+void krstrncpy(char *s, const char *t, size_t n)
+{
+    size_t len = strlen(t);
+
+    for (int i = 0;  (n > i) && (*s++ = *t++); i++)
+        ;
+    for (;len < n; len++)
+    {
+        *s++ = '\0';
+    }
+}
+
+void krstrncat(char *s, const char *t, size_t n)
+{
+    s = last_char_in_string(s) + 1;
+    for(int i=0; i < n && (*s++ = *t++); i++)
+        ;
+}
+
+int16_t krstrncmp(const char *s, const char *t, size_t n)
+{
+    size_t tmpn = strlen(s) > strlen(t) ? strlen(t) : strlen(s);
+    n = n > tmpn ? tmpn : n;
+
+    for(int i = 0; i < n; i++)
+    {
+        if (s[i] > t[i])
+        {
+            return 1;
+        }
+        else if (s[i] < t[i])
+        {
+            return -1;
+        }
+    }
+    return 0;
 }
